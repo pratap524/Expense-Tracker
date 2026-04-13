@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Tracker React</title>
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    />
+
+    <script>
+      tailwind = window.tailwind || {};
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface-variant": "#aaaab5",
+              background: "#0d0e12",
+              "on-tertiary-fixed-variant": "#604a71",
+              "on-primary-fixed-variant": "#384775",
+              outline: "#74757f",
+              "outline-variant": "#464750",
+              "on-primary-fixed": "#1a2a56",
+              "on-error-container": "#ff9993",
+              "surface-dim": "#0d0e12",
+              "surface-bright": "#2a2c34",
+              "on-secondary-fixed": "#393f51",
+              "tertiary-container": "#e6cafa",
+              "on-secondary-fixed-variant": "#565b6f",
+              "primary-fixed": "#b6c5fb",
+              "on-tertiary-fixed": "#422d53",
+              "inverse-on-surface": "#54555a",
+              "tertiary-fixed": "#e6cafa",
+              "on-primary": "#2f3e6b",
+              tertiary: "#f1daff",
+              "secondary-container": "#363b4d",
+              "secondary-fixed-dim": "#cfd3eb",
+              "primary-container": "#42517f",
+              primary: "#b6c5fb",
+              "on-tertiary-container": "#564067",
+              "on-background": "#e4e4f0",
+              "tertiary-fixed-dim": "#d8bceb",
+              "on-primary-container": "#dce2ff",
+              "surface-tint": "#b6c5fb",
+              "secondary-fixed": "#dde1f9",
+              "error-container": "#871f21",
+              secondary: "#c1c5dd",
+              error: "#fa746f",
+              "surface-variant": "#23252e",
+              "on-secondary": "#3a4052",
+              "inverse-surface": "#faf8fe",
+              "primary-fixed-dim": "#a8b7ec",
+              "on-secondary-container": "#babed5",
+              "surface-container-lowest": "#000000",
+              "inverse-primary": "#4e5d8c",
+              "surface-container-highest": "#23252e",
+              surface: "#0d0e12",
+              "on-tertiary": "#5f4971",
+              "on-surface": "#e4e4f0",
+              "surface-container": "#181920",
+              "surface-container-low": "#121318",
+              "surface-container-high": "#1e1f26",
+              "on-error": "#490006",
+              "primary-dim": "#a8b7ec",
+              "error-dim": "#c54d4a",
+              "tertiary-dim": "#d8bceb",
+              "secondary-dim": "#b3b8cf"
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem"
+            },
+            fontFamily: {
+              headline: ["Manrope"],
+              body: ["Inter"],
+              label: ["Inter"],
+              display: ["Manrope"]
+            }
+          }
+        }
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
