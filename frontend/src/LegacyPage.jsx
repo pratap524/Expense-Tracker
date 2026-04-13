@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { logoutUser } from "./api/auth";
+import { clearAuthSession, getRefreshToken } from "./auth/session";
 
 function LegacyPage({ title, html }) {
   const iframeRef = useRef(null);
@@ -97,7 +99,7 @@ function LegacyPage({ title, html }) {
     removeAnalyticsItems(doc);
     applySignedUpProfile(doc);
 
-    const clickHandler = (event) => {
+    const clickHandler = async (event) => {
       const target = event.target.closest("a, button, div");
 
       if (!target) {
@@ -108,6 +110,24 @@ function LegacyPage({ title, html }) {
       const text = (target.textContent || "").toLowerCase();
       const icon = (target.querySelector(".material-symbols-outlined")?.textContent || "").toLowerCase();
       const content = `${text} ${icon}`;
+
+      if (/\blogout\b|\bsign out\b/.test(content)) {
+        event.preventDefault();
+
+        const refreshToken = getRefreshToken();
+        if (refreshToken) {
+          try {
+            await logoutUser({ refreshToken });
+          } catch {
+            // Client logout should still succeed even if backend token revoke fails.
+          }
+        }
+
+        clearAuthSession();
+        navigate("/login");
+        return;
+      }
+
       const route = resolveRoute(content);
 
       if (!route) {

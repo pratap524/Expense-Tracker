@@ -1,17 +1,48 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "./api/auth";
+import { setAuthSession } from "./auth/session";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     document.title = "Login | Expense Tracker React";
   }, []);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    navigate("/dashboard-3");
+
+    if (isSubmitting) {
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "");
+
+    setErrorMessage("");
+    setIsSubmitting(true);
+
+    try {
+      const result = await loginUser({ email, password });
+
+      setAuthSession({
+        accessToken: result.access_token,
+        refreshToken: result.refresh_token,
+        fullName: result.user?.full_name,
+        email: result.user?.email,
+      });
+
+      navigate("/dashboard-3");
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to sign in. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -85,10 +116,16 @@ function LoginPage() {
               </div>
 
               <div className="pt-2">
-                <button className="editorial-gradient w-full rounded-xl py-4 font-headline font-bold text-on-primary-fixed shadow-lg transition-all duration-200 hover:scale-[1.01] hover:shadow-primary/20 active:scale-[0.99]" type="submit">
-                  Sign In
+                <button
+                  className="editorial-gradient w-full rounded-xl py-4 font-headline font-bold text-on-primary-fixed shadow-lg transition-all duration-200 hover:scale-[1.01] hover:shadow-primary/20 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Signing in..." : "Sign In"}
                 </button>
               </div>
+
+              {errorMessage ? <p className="text-sm text-error">{errorMessage}</p> : null}
             </form>
 
             <div className="mt-10 text-center">

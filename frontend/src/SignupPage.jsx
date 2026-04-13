@@ -1,30 +1,44 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { registerUser } from "./api/auth";
+import { setAuthSession } from "./auth/session";
 
 function SignupPage() {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     document.title = "Sign Up | Expense Tracker React";
   }, []);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
 
     const formData = new FormData(event.currentTarget);
     const fullName = String(formData.get("full-name") || "").trim();
     const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "");
 
-    if (fullName) {
-      localStorage.setItem("architectUserName", fullName);
+    setErrorMessage("");
+    setIsSubmitting(true);
+
+    try {
+      await registerUser({ fullName, email, password });
+
+      setAuthSession({ fullName, email });
+
+      navigate("/dashboard-3");
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to create account. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (email) {
-      localStorage.setItem("architectUserEmail", email);
-    }
-
-    navigate("/dashboard-3");
   };
 
   return (
@@ -112,10 +126,16 @@ function SignupPage() {
               </div>
 
               <div className="pt-2">
-                <button className="bg-architect-gradient w-full rounded-xl py-4 font-headline text-lg font-bold text-slate-50 shadow-lg shadow-primary/10 transition-all hover:opacity-90 active:scale-[0.98]" type="submit">
-                  Create Account
+                <button
+                  className="bg-architect-gradient w-full rounded-xl py-4 font-headline text-lg font-bold text-slate-50 shadow-lg shadow-primary/10 transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Creating account..." : "Create Account"}
                 </button>
               </div>
+
+              {errorMessage ? <p className="text-sm text-error">{errorMessage}</p> : null}
             </form>
 
             <p className="mt-10 text-center font-body text-sm text-on-surface-variant">

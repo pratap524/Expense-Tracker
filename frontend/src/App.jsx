@@ -3,7 +3,24 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import LegacyPage from "./LegacyPage";
 import LoginPage from "./LoginPage";
 import SignupPage from "./SignupPage";
+import { isAuthenticated } from "./auth/session";
 import { legacyPages } from "./legacyPages";
+
+function ProtectedRoute({ children }) {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
+function PublicOnlyRoute({ children }) {
+  if (isAuthenticated()) {
+    return <Navigate to="/dashboard-3" replace />;
+  }
+
+  return children;
+}
 
 function App() {
   const location = useLocation();
@@ -36,14 +53,32 @@ function App() {
       ) : null}
 
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/" element={<Navigate to={isAuthenticated() ? "/dashboard-3" : "/login"} replace />} />
+        <Route
+          path="/login"
+          element={
+            <PublicOnlyRoute>
+              <LoginPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <PublicOnlyRoute>
+              <SignupPage />
+            </PublicOnlyRoute>
+          }
+        />
         {Object.entries(legacyPages).map(([path, page]) => (
           <Route
             key={path}
             path={path}
-            element={<LegacyPage title={page.title} html={page.html} />}
+            element={
+              <ProtectedRoute>
+                <LegacyPage title={page.title} html={page.html} />
+              </ProtectedRoute>
+            }
           />
         ))}
         <Route path="*" element={<Navigate to="/login" replace />} />
