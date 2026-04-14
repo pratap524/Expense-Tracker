@@ -1,15 +1,9 @@
-from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError
-
-_password_hasher = PasswordHasher()
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 def hash_password(password: str) -> str:
-    return _password_hasher.hash(password)
+    return generate_password_hash(password, method="scrypt")
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    try:
-        return _password_hasher.verify(password_hash, password)
-    except VerifyMismatchError:
-        return False
+    return check_password_hash(password_hash, password)

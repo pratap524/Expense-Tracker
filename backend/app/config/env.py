@@ -1,34 +1,53 @@
+import os
+from dataclasses import dataclass
 from functools import lru_cache
 
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from dotenv import load_dotenv
 
 
-class EnvSettings(BaseSettings):
-    """Typed environment variables with strict validation."""
+load_dotenv()
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=True,
-        extra="ignore",
-    )
 
-    APP_ENV: str = Field(default="development")
-    DEBUG: bool = Field(default=False)
+def _to_bool(value: str | None, default: bool = False) -> bool:
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
 
-    SECRET_KEY: str = Field(min_length=16)
-    DATABASE_URL: str = Field(default="postgresql+psycopg://postgres:postgres@localhost:5432/expense_tracker")
 
-    JWT_SECRET_KEY: str = Field(min_length=16)
-    JWT_ACCESS_TOKEN_EXPIRES_MINUTES: int = Field(default=15, ge=1)
-    JWT_REFRESH_TOKEN_EXPIRES_DAYS: int = Field(default=7, ge=1)
-
-    CORS_ORIGINS: str = Field(default="http://localhost:5174")
-
-    RATE_LIMIT_DEFAULT: str = Field(default="200 per hour")
+@dataclass(frozen=True)
+class EnvSettings:
+    APP_ENV: str
+    DEBUG: bool
+    SECRET_KEY: str
+    DATABASE_URL: str
+    JWT_SECRET_KEY: str
+    JWT_ACCESS_TOKEN_EXPIRES_MINUTES: int
+    JWT_REFRESH_TOKEN_EXPIRES_DAYS: int
+    CORS_ORIGINS: str
+    RATE_LIMIT_DEFAULT: str
 
 
 @lru_cache(maxsize=1)
 def get_env_settings() -> EnvSettings:
-    return EnvSettings()
+    secret_key = os.getenv("SECRET_KEY", "")
+    jwt_secret = os.getenv("JWT_SECRET_KEY", "")
+
+    if len(secret_key) < 16:
+        raise ValueError("SECRET_KEY must be at least 16 characters.")
+    if len(jwt_secret) < 16:
+        raise ValueError("JWT_SECRET_KEY must be at least 16 characters.")
+
+    return EnvSettings(
+        APP_ENV=os.getenv("APP_ENV", "development"),
+        DEBUG=_to_bool(os.getenv("DEBUG"), default=False),
+        SECRET_KEY=secret_key,
+        DATABASE_URL=os.getenv(
+            "DATABASE_URL",
+            "postgresql+psycopg://postgres:postgres@localhost:5432/expense_tracker",
+        ),
+        JWT_SECRET_KEY=jwt_secret,
+        JWT_ACCESS_TOKEN_EXPIRES_MINUTES=max(1, int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES_MINUTES", "15"))),
+        JWT_REFRESH_TOKEN_EXPIRES_DAYS=max(1, int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES_DAYS", "7"))),
+        CORS_ORIGINS=os.getenv("CORS_ORIGINS", "http://localhost:5174"),
+        RATE_LIMIT_DEFAULT=os.getenv("RATE_LIMIT_DEFAULT", "200 per hour"),
+    )

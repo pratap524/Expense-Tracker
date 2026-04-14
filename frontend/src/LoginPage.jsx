@@ -6,6 +6,9 @@ import { setAuthSession } from "./auth/session";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -20,15 +23,13 @@ function LoginPage() {
       return;
     }
 
-    const formData = new FormData(event.currentTarget);
-    const email = String(formData.get("email") || "").trim();
-    const password = String(formData.get("password") || "");
+    const normalizedEmail = email.trim();
 
     setErrorMessage("");
     setIsSubmitting(true);
 
     try {
-      const result = await loginUser({ email, password });
+      const result = await loginUser({ email: normalizedEmail, password });
 
       setAuthSession({
         accessToken: result.access_token,
@@ -70,7 +71,7 @@ function LoginPage() {
               <p className="font-label text-sm font-medium uppercase tracking-widest text-on-surface-variant">Wealth Management</p>
             </div>
 
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-6" onSubmit={handleSubmit} autoComplete="off">
               <div className="space-y-2">
                 <label className="ml-1 block font-label text-xs font-semibold text-on-surface-variant" htmlFor="email">
                   EMAIL ADDRESS
@@ -81,8 +82,11 @@ function LoginPage() {
                   </div>
                   <input
                     id="email"
-                    name="email"
+                    name="login_email_field"
                     type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    autoComplete="off"
                     placeholder="name@company.com"
                     className="block w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-4 text-on-surface placeholder:text-outline/50 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
                   />
@@ -104,13 +108,21 @@ function LoginPage() {
                   </div>
                   <input
                     id="password"
-                    name="password"
-                    type="password"
+                    name="login_password_field"
+                    type={isPasswordVisible ? "text" : "password"}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    autoComplete="new-password"
                     placeholder="••••••••"
                     className="block w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-12 text-on-surface placeholder:text-outline/50 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
                   />
-                  <button className="absolute inset-y-0 right-0 flex items-center pr-4 text-on-surface-variant transition-colors hover:text-on-surface" type="button">
-                    <span className="material-symbols-outlined text-lg">visibility</span>
+                  <button
+                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-on-surface-variant transition-colors hover:text-on-surface"
+                    type="button"
+                    onClick={() => setIsPasswordVisible((current) => !current)}
+                    aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+                  >
+                    <span className="material-symbols-outlined text-lg">{isPasswordVisible ? "visibility_off" : "visibility"}</span>
                   </button>
                 </div>
               </div>

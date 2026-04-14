@@ -6,6 +6,9 @@ import { setAuthSession } from "./auth/session";
 
 function SignupPage() {
   const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -20,18 +23,16 @@ function SignupPage() {
       return;
     }
 
-    const formData = new FormData(event.currentTarget);
-    const fullName = String(formData.get("full-name") || "").trim();
-    const email = String(formData.get("email") || "").trim();
-    const password = String(formData.get("password") || "");
+    const normalizedFullName = fullName.trim();
+    const normalizedEmail = email.trim();
 
     setErrorMessage("");
     setIsSubmitting(true);
 
     try {
-      await registerUser({ fullName, email, password });
+      await registerUser({ fullName: normalizedFullName, email: normalizedEmail, password });
 
-      setAuthSession({ fullName, email });
+      setAuthSession({ fullName: normalizedFullName, email: normalizedEmail });
 
       navigate("/dashboard-3");
     } catch (error) {
@@ -70,7 +71,7 @@ function SignupPage() {
               <p className="body-md text-on-surface-variant">Secure wealth management for the modern era.</p>
             </div>
 
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-6" onSubmit={handleSubmit} autoComplete="off">
               <div className="space-y-2">
                 <label className="ml-1 block font-label text-xs font-semibold uppercase tracking-wider text-on-surface-variant" htmlFor="full-name">
                   Full Name
@@ -81,8 +82,11 @@ function SignupPage() {
                   </div>
                   <input
                     id="full-name"
-                    name="full-name"
+                    name="signup_full_name_field"
                     type="text"
+                    value={fullName}
+                    onChange={(event) => setFullName(event.target.value)}
+                    autoComplete="off"
                     placeholder="Johnathan Sterling"
                     className="w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-4 font-body text-on-surface placeholder:text-outline-variant transition-all focus:ring-2 focus:ring-primary/20"
                   />
@@ -99,8 +103,11 @@ function SignupPage() {
                   </div>
                   <input
                     id="email"
-                    name="email"
+                    name="signup_email_field"
                     type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    autoComplete="off"
                     placeholder="john@architect.com"
                     className="w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-4 font-body text-on-surface placeholder:text-outline-variant transition-all focus:ring-2 focus:ring-primary/20"
                   />
@@ -117,8 +124,11 @@ function SignupPage() {
                   </div>
                   <input
                     id="password"
-                    name="password"
+                    name="signup_password_field"
                     type="password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    autoComplete="new-password"
                     placeholder="••••••••••••"
                     className="w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-4 font-body text-on-surface placeholder:text-outline-variant transition-all focus:ring-2 focus:ring-primary/20"
                   />

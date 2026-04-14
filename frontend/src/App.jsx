@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import LegacyPage from "./LegacyPage";
 import LoginPage from "./LoginPage";
 import SignupPage from "./SignupPage";
+import SpendingReportPage from "./SpendingReportPage";
 import { isAuthenticated } from "./auth/session";
 import { legacyPages } from "./legacyPages";
 
@@ -68,6 +69,14 @@ function App() {
             <PublicOnlyRoute>
               <SignupPage />
             </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/spending-report"
+          element={
+            <ProtectedRoute>
+              <SpendingReportPage />
+            </ProtectedRoute>
           }
         />
         {Object.entries(legacyPages).map(([path, page]) => (

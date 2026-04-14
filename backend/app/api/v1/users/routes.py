@@ -2,7 +2,6 @@ from uuid import UUID
 
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, get_jwt, jwt_required
-from pydantic import ValidationError
 
 from app.api.v1.users.schemas import CreateUserRequest, UpdateUserRequest
 from app.core.problem_details import problem_response
@@ -23,8 +22,8 @@ def list_users():
 @require_roles("admin")
 def create_user():
     try:
-        payload = CreateUserRequest.model_validate(request.get_json(force=True, silent=False))
-    except ValidationError as exc:
+        payload = CreateUserRequest.from_payload(request.get_json(force=True, silent=False) or {})
+    except ValueError as exc:
         return problem_response(422, "Validation Error", str(exc))
 
     data, error = _user_service.create_user(
@@ -65,11 +64,11 @@ def update_user(user_id: UUID):
         return problem_response(403, "Forbidden", "Cannot update this user.")
 
     try:
-        payload = UpdateUserRequest.model_validate(request.get_json(force=True, silent=False))
-    except ValidationError as exc:
+        payload = UpdateUserRequest.from_payload(request.get_json(force=True, silent=False) or {})
+    except ValueError as exc:
         return problem_response(422, "Validation Error", str(exc))
 
-    update_data = payload.model_dump(exclude_none=True)
+    update_data = payload.to_dict()
     if claims.get("role") != "admin":
         update_data.pop("role", None)
 

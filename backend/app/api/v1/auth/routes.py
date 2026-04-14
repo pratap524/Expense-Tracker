@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from pydantic import ValidationError
 
 from app.api.v1.auth.schemas import LoginRequest, LogoutRequest, RegisterRequest
 from app.core.problem_details import problem_response
@@ -13,8 +12,8 @@ _auth_service = AuthService()
 @auth_blueprint.post("/auth/register")
 def register():
     try:
-        payload = RegisterRequest.model_validate(request.get_json(force=True, silent=False))
-    except ValidationError as exc:
+        payload = RegisterRequest.from_payload(request.get_json(force=True, silent=False) or {})
+    except ValueError as exc:
         return problem_response(422, "Validation Error", str(exc))
 
     user, error = _auth_service.register_user(payload.full_name, payload.email, payload.password)
@@ -27,8 +26,8 @@ def register():
 @auth_blueprint.post("/auth/login")
 def login():
     try:
-        payload = LoginRequest.model_validate(request.get_json(force=True, silent=False))
-    except ValidationError as exc:
+        payload = LoginRequest.from_payload(request.get_json(force=True, silent=False) or {})
+    except ValueError as exc:
         return problem_response(422, "Validation Error", str(exc))
 
     data, error = _auth_service.login(
@@ -60,8 +59,8 @@ def refresh_access_token():
 @auth_blueprint.post("/auth/logout")
 def logout():
     try:
-        payload = LogoutRequest.model_validate(request.get_json(force=True, silent=False))
-    except ValidationError as exc:
+        payload = LogoutRequest.from_payload(request.get_json(force=True, silent=False) or {})
+    except ValueError as exc:
         return problem_response(422, "Validation Error", str(exc))
 
     _auth_service.logout(payload.refresh_token)
