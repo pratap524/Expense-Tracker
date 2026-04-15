@@ -194,6 +194,31 @@ function applyDashboardPieChart(doc, rows) {
     circle.setAttribute("stroke-dashoffset", "0");
   });
 
+  const legendRows = Array.from(doc.querySelectorAll("h3"))
+    .find((node) => /spending categories/i.test(node.textContent || ""))
+    ?.closest("div")
+    ?.querySelectorAll(".space-y-4 > .flex.items-center.justify-between.text-sm");
+
+  if (legendRows && legendRows.length) {
+    Array.from(legendRows).forEach((row) => {
+      row.style.display = "flex";
+      const label = row.querySelector("span.font-medium");
+      const percentage = row.querySelector("span.text-on-surface-variant");
+      if (label) {
+        label.textContent = "No Data";
+      }
+      if (percentage) {
+        percentage.textContent = "0%";
+      }
+    });
+  }
+
+  const totalLabel = Array.from(doc.querySelectorAll("span")).find((node) => (node.textContent || "").trim().toLowerCase() === "total");
+  const totalValue = totalLabel?.nextElementSibling;
+  if (totalValue) {
+    totalValue.textContent = formatCurrency(0);
+  }
+
   const { categories, totalSpent } = summarizeExpenseCategories(rows);
   if (!categories.length || totalSpent <= 0) {
     return;
@@ -204,11 +229,6 @@ function applyDashboardPieChart(doc, rows) {
   if (displayedTotal <= 0) {
     return;
   }
-
-  const legendRows = Array.from(doc.querySelectorAll("h3"))
-    .find((node) => /spending categories/i.test(node.textContent || ""))
-    ?.closest("div")
-    ?.querySelectorAll(".space-y-4 > .flex.items-center.justify-between.text-sm");
 
   const circleRadius = Number.parseFloat(pieCircles[0]?.getAttribute("r") || "40");
   const circumference = 2 * Math.PI * circleRadius;
@@ -250,8 +270,6 @@ function applyDashboardPieChart(doc, rows) {
     });
   }
 
-  const totalLabel = Array.from(doc.querySelectorAll("span")).find((node) => (node.textContent || "").trim().toLowerCase() === "total");
-  const totalValue = totalLabel?.nextElementSibling;
   if (totalValue) {
     totalValue.textContent = formatCurrency(totalSpent);
   }
@@ -398,12 +416,9 @@ function LegacyPage({ title, html }) {
   };
 
   const applyCsvDataToTransactions = (doc, rows) => {
-    if (!rows.length) {
-      return;
-    }
-
     const pageSize = 10;
-    let activeRows = [...rows];
+    const normalizedRows = Array.isArray(rows) ? rows : [];
+    let activeRows = [...normalizedRows];
     const state = {
       currentPage: 1,
       totalPages: Math.max(1, Math.ceil(activeRows.length / pageSize)),
@@ -539,7 +554,7 @@ function LegacyPage({ title, html }) {
 
     if (categorySelect) {
       const categoryMap = new Map();
-      rows.forEach((item) => {
+      normalizedRows.forEach((item) => {
         const rawCategory = String(item.category || "General").trim() || "General";
         const key = rawCategory.toLowerCase();
         if (!categoryMap.has(key)) {
@@ -554,8 +569,8 @@ function LegacyPage({ title, html }) {
         const selected = (categorySelect.value || "All Categories").trim().toLowerCase();
         activeRows =
           selected === "all categories"
-            ? [...rows]
-            : rows.filter((item) => String(item.category || "General").trim().toLowerCase() === selected);
+            ? [...normalizedRows]
+            : normalizedRows.filter((item) => String(item.category || "General").trim().toLowerCase() === selected);
         state.currentPage = 1;
         renderTransactionsPage();
       });
