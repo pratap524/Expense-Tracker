@@ -203,15 +203,20 @@ function applyDashboardPieChart(doc, rows) {
 
   if (!rows || !rows.length) {
     if (legendRows && legendRows.length) {
-      Array.from(legendRows).forEach((row) => {
-        row.style.display = "flex";
-        const label = row.querySelector("span.font-medium");
-        const percentage = row.querySelector("span.text-on-surface-variant");
-        if (label) {
-          label.textContent = "No Data";
-        }
-        if (percentage) {
-          percentage.textContent = "0%";
+      Array.from(legendRows).forEach((row, idx) => {
+        // Hide all but the first row, and set the first row to No Data/0%
+        if (idx === 0) {
+          row.style.display = "flex";
+          const label = row.querySelector("span.font-medium");
+          const percentage = row.querySelector("span.text-on-surface-variant");
+          if (label) {
+            label.textContent = "No Data";
+          }
+          if (percentage) {
+            percentage.textContent = "0%";
+          }
+        } else {
+          row.style.display = "none";
         }
       });
     }
