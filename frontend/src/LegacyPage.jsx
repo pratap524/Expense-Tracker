@@ -153,6 +153,10 @@ function saveCsvRows(rows) {
   localStorage.setItem(CSV_DATA_KEY, JSON.stringify(rows));
 }
 
+function clearCsvRows() {
+  localStorage.removeItem(CSV_DATA_KEY);
+}
+
 function summarizeExpenseCategories(rows) {
   const byCategory = new Map();
 
@@ -184,6 +188,12 @@ function summarizeExpenseCategories(rows) {
 }
 
 function applyDashboardPieChart(doc, rows) {
+  const pieCircles = Array.from(doc.querySelectorAll("svg .pie-segment"));
+  pieCircles.forEach((circle) => {
+    circle.setAttribute("stroke-dasharray", "0 999");
+    circle.setAttribute("stroke-dashoffset", "0");
+  });
+
   const { categories, totalSpent } = summarizeExpenseCategories(rows);
   if (!categories.length || totalSpent <= 0) {
     return;
@@ -195,7 +205,6 @@ function applyDashboardPieChart(doc, rows) {
     return;
   }
 
-  const pieCircles = Array.from(doc.querySelectorAll("svg .pie-segment"));
   const legendRows = Array.from(doc.querySelectorAll("h3"))
     .find((node) => /spending categories/i.test(node.textContent || ""))
     ?.closest("div")
@@ -334,10 +343,6 @@ function LegacyPage({ title, html }) {
   };
 
   const applyCsvDataToDashboard = (doc, rows) => {
-    if (!rows.length) {
-      return;
-    }
-
     const incomeTotal = rows.filter((item) => item.amount > 0).reduce((sum, item) => sum + item.amount, 0);
     const spendingTotal = rows.filter((item) => item.amount < 0).reduce((sum, item) => sum + Math.abs(item.amount), 0);
     const balance = incomeTotal - spendingTotal;
@@ -363,6 +368,12 @@ function LegacyPage({ title, html }) {
     const recentHeader = Array.from(doc.querySelectorAll("h3")).find((node) => /recent transactions/i.test(node.textContent || ""));
     const listContainer = recentHeader?.parentElement?.nextElementSibling;
     if (!listContainer) {
+      return;
+    }
+
+    if (!rows.length) {
+      listContainer.innerHTML = `<div class="bg-surface-container-lowest p-4 rounded-2xl text-on-surface-variant text-sm">No CSV transactions imported yet.</div>`;
+      applyDashboardPieChart(doc, []);
       return;
     }
 
@@ -589,8 +600,20 @@ function LegacyPage({ title, html }) {
     importButton.className = "bg-primary hover:bg-primary-container text-on-primary px-4 py-2 rounded-xl font-manrope text-sm font-semibold tracking-tight transition-all active:scale-95 duration-200 ease-in-out";
     importButton.textContent = "Add CSV";
 
+    const removeButton = doc.createElement("button");
+    removeButton.type = "button";
+    removeButton.id = "architect-csv-remover";
+    removeButton.className = "bg-error-container hover:opacity-90 text-on-error-container px-4 py-2 rounded-xl font-manrope text-sm font-semibold tracking-tight transition-all active:scale-95 duration-200 ease-in-out";
+    removeButton.textContent = "Remove CSV";
+
     importButton.addEventListener("click", () => {
       fileInput.click();
+    });
+
+    removeButton.addEventListener("click", () => {
+      clearCsvRows();
+      applyCsvData(doc, pageTitle, []);
+      doc.defaultView?.alert("CSV data removed.");
     });
 
     fileInput.addEventListener("change", async () => {
@@ -613,6 +636,7 @@ function LegacyPage({ title, html }) {
       fileInput.value = "";
     });
 
+    topBar.insertBefore(removeButton, topBar.firstChild);
     topBar.insertBefore(importButton, topBar.firstChild);
     doc.body.appendChild(fileInput);
   };
