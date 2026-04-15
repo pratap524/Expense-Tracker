@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, current_app, jsonify
 from werkzeug.exceptions import HTTPException
 
 
@@ -17,7 +17,8 @@ def register_error_handlers(app: Flask) -> None:
         return jsonify(response), exc.code, {"Content-Type": PROBLEM_JSON}
 
     @app.errorhandler(Exception)
-    def handle_unexpected_error(_: Exception):
+    def handle_unexpected_error(exc: Exception):
+        current_app.logger.exception("Unhandled application exception", exc_info=exc)
         response = {
             "type": "about:blank",
             "title": "Internal Server Error",

@@ -12,10 +12,14 @@ class Base(DeclarativeBase):
     pass
 
 
+def _safe_remote_address() -> str:
+    return get_remote_address() or "127.0.0.1"
+
+
 db = SQLAlchemy(model_class=Base)
 migrate = Migrate()
 jwt = JWTManager()
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(key_func=_safe_remote_address)
 
 
 def init_extensions(app: Flask) -> None:
