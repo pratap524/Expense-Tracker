@@ -88,7 +88,8 @@ function LoginPage() {
                     onChange={(event) => setEmail(event.target.value)}
                     autoComplete="off"
                     placeholder="name@company.com"
-                    className="block w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-4 text-on-surface placeholder:text-outline/50 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
+                    className="block w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-4 font-body text-on-surface placeholder:text-outline-variant transition-all focus:ring-2 focus:ring-primary/20"
+                    style={{ color: '#e4e4f0', background: 'none', position: 'relative', zIndex: 1 }}
                   />
                 </div>
               </div>
@@ -114,7 +115,8 @@ function LoginPage() {
                     onChange={(event) => setPassword(event.target.value)}
                     autoComplete="new-password"
                     placeholder="••••••••"
-                    className="block w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-12 text-on-surface placeholder:text-outline/50 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
+                    className="block w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-12 font-body text-on-surface placeholder:text-outline-variant transition-all focus:ring-2 focus:ring-primary/20"
+                    style={{ color: '#e4e4f0', background: 'none', position: 'relative', zIndex: 1 }}
                   />
                   <button
                     className="absolute inset-y-0 right-0 flex items-center pr-4 text-on-surface-variant transition-colors hover:text-on-surface"
