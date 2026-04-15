@@ -37,14 +37,22 @@ def get_env_settings() -> EnvSettings:
     if len(jwt_secret) < 16:
         raise ValueError("JWT_SECRET_KEY must be at least 16 characters.")
 
+    database_url = os.getenv(
+        "DATABASE_URL",
+        "postgresql+psycopg://postgres:postgres@localhost:5432/expense_tracker",
+    )
+
+    # Render commonly provides postgresql:// URLs; force psycopg v3 driver explicitly.
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql+psycopg://", 1)
+    elif database_url.startswith("postgresql://") and not database_url.startswith("postgresql+psycopg://"):
+        database_url = database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
     return EnvSettings(
         APP_ENV=os.getenv("APP_ENV", "development"),
         DEBUG=_to_bool(os.getenv("DEBUG"), default=False),
         SECRET_KEY=secret_key,
-        DATABASE_URL=os.getenv(
-            "DATABASE_URL",
-            "postgresql+psycopg://postgres:postgres@localhost:5432/expense_tracker",
-        ),
+        DATABASE_URL=database_url,
         JWT_SECRET_KEY=jwt_secret,
         JWT_ACCESS_TOKEN_EXPIRES_MINUTES=max(1, int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES_MINUTES", "15"))),
         JWT_REFRESH_TOKEN_EXPIRES_DAYS=max(1, int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES_DAYS", "7"))),
