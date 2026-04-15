@@ -685,10 +685,32 @@ function LegacyPage({ title, html }) {
     const importedRows = loadCsvRows();
     applyCsvData(doc, title, importedRows);
 
-    const clickHandler = async (event) => {
-      const target = event.target.closest("a, button, div");
 
-      if (!target) {
+    const clickHandler = async (event) => {
+      let target = event.target;
+      // Traverse up to find actionable element
+      while (target && !target.closest("a,button,div")) {
+        target = target.parentElement;
+      }
+      target = target?.closest("a,button,div");
+      if (!target) return;
+
+      // Robust sign out detection
+      const isSignOut =
+        target.hasAttribute("data-signout") ||
+        /sign out|logout/i.test(target.textContent || "") ||
+        /logout|sign out/i.test((target.querySelector(".material-symbols-outlined")?.textContent || ""));
+
+      if (isSignOut) {
+        event.preventDefault();
+        const refreshToken = getRefreshToken();
+        if (refreshToken) {
+          try {
+            await logoutUser({ refreshToken });
+          } catch {}
+        }
+        clearAuthSession();
+        navigate("/login");
         return;
       }
 
@@ -696,30 +718,8 @@ function LegacyPage({ title, html }) {
       const text = (target.textContent || "").toLowerCase();
       const icon = (target.querySelector(".material-symbols-outlined")?.textContent || "").toLowerCase();
       const content = `${text} ${icon}`;
-
-      if (/\blogout\b|\bsign out\b/.test(content)) {
-        event.preventDefault();
-
-        const refreshToken = getRefreshToken();
-        if (refreshToken) {
-          try {
-            await logoutUser({ refreshToken });
-          } catch {
-            // Client logout should still succeed even if backend token revoke fails.
-          }
-        }
-
-        clearAuthSession();
-        navigate("/login");
-        return;
-      }
-
       const route = resolveRoute(content);
-
-      if (!route) {
-        return;
-      }
-
+      if (!route) return;
       if (href === "#" || target.tagName === "BUTTON" || target.tagName === "DIV") {
         event.preventDefault();
         navigate(route);
