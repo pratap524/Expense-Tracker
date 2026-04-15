@@ -11,6 +11,7 @@ function SignupPage() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   useEffect(() => {
     document.title = "Sign Up | Expense Tracker React";
@@ -40,6 +41,10 @@ function SignupPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible((prev) => !prev);
   };
 
   return (
@@ -127,14 +132,22 @@ function SignupPage() {
                   <input
                     id="password"
                     name="signup_password_field"
-                    type="password"
+                    type={isPasswordVisible ? "text" : "password"}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     autoComplete="new-password"
                     placeholder="••••••••••••"
-                    className="w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-4 font-body text-on-surface placeholder:text-outline-variant transition-all focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-12 font-body text-on-surface placeholder:text-outline-variant transition-all focus:ring-2 focus:ring-primary/20"
                     style={{ color: '#e4e4f0', background: 'none', position: 'relative', zIndex: 1 }}
                   />
+                  <button
+                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-on-surface-variant transition-colors hover:text-on-surface"
+                    type="button"
+                    onClick={() => setIsPasswordVisible((current) => !current)}
+                    aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+                  >
+                    <span className="material-symbols-outlined text-lg">{isPasswordVisible ? "visibility_off" : "visibility"}</span>
+                  </button>
                 </div>
               </div>
 
