@@ -194,23 +194,33 @@ function applyDashboardPieChart(doc, rows) {
     circle.setAttribute("stroke-dashoffset", "0");
   });
 
+
+  // Always zero out all legend rows if no data
   const legendRows = Array.from(doc.querySelectorAll("h3"))
     .find((node) => /spending categories/i.test(node.textContent || ""))
     ?.closest("div")
     ?.querySelectorAll(".space-y-4 > .flex.items-center.justify-between.text-sm");
 
-  if (legendRows && legendRows.length) {
-    Array.from(legendRows).forEach((row) => {
-      row.style.display = "flex";
-      const label = row.querySelector("span.font-medium");
-      const percentage = row.querySelector("span.text-on-surface-variant");
-      if (label) {
-        label.textContent = "No Data";
-      }
-      if (percentage) {
-        percentage.textContent = "0%";
-      }
-    });
+  if (!rows || !rows.length) {
+    if (legendRows && legendRows.length) {
+      Array.from(legendRows).forEach((row) => {
+        row.style.display = "flex";
+        const label = row.querySelector("span.font-medium");
+        const percentage = row.querySelector("span.text-on-surface-variant");
+        if (label) {
+          label.textContent = "No Data";
+        }
+        if (percentage) {
+          percentage.textContent = "0%";
+        }
+      });
+    }
+    const totalLabel = Array.from(doc.querySelectorAll("span")).find((node) => (node.textContent || "").trim().toLowerCase() === "total");
+    const totalValue = totalLabel?.nextElementSibling;
+    if (totalValue) {
+      totalValue.textContent = formatCurrency(0);
+    }
+    return;
   }
 
   const totalLabel = Array.from(doc.querySelectorAll("span")).find((node) => (node.textContent || "").trim().toLowerCase() === "total");
