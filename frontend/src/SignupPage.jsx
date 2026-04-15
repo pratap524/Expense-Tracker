@@ -111,6 +111,7 @@ function SignupPage() {
                     autoComplete="off"
                     placeholder="john@architect.com"
                     className="w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-4 font-body text-on-surface placeholder:text-outline-variant transition-all focus:ring-2 focus:ring-primary/20"
+                    style={{ color: '#e4e4f0', background: 'none', position: 'relative', zIndex: 1 }}
                   />
                 </div>
               </div>
@@ -132,6 +133,7 @@ function SignupPage() {
                     autoComplete="new-password"
                     placeholder="••••••••••••"
                     className="w-full rounded-xl border-none bg-surface-container-high py-4 pl-12 pr-4 font-body text-on-surface placeholder:text-outline-variant transition-all focus:ring-2 focus:ring-primary/20"
+                    style={{ color: '#e4e4f0', background: 'none', position: 'relative', zIndex: 1 }}
                   />
                 </div>
               </div>
